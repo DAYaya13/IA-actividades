@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Mi Ficha de Misión · Clase 11</title>
+<link href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700;900&family=Oswald:wght@500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#F4F5FB; --panel:#FFFFFF; --ink:#2B2566; --soft:#5F6380; --line:#E3E5F0;
+  --indigo:#43339A; --teal:#0E9AA7; --tealbg:#DDF3F5; --coral:#FF5A5F; --coralbg:#FFE9EA; --cyan:#7FF5FF;
+  --h1:#45A6A8; --h2:#4A2F95;
+  box-sizing:border-box; padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#141330; --panel:#1E1C44; --ink:#ECEBFF; --soft:#A7A8C8; --line:#34325E;
+    --indigo:#A99BFF; --teal:#3CC7D2; --tealbg:#153A40; --coral:#FF7C80; --coralbg:#3F1E2A; --h1:#2E7C7F; --h2:#35226E;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#141330; --panel:#1E1C44; --ink:#ECEBFF; --soft:#A7A8C8; --line:#34325E;
+  --indigo:#A99BFF; --teal:#3CC7D2; --tealbg:#153A40; --coral:#FF7C80; --coralbg:#3F1E2A; --h1:#2E7C7F; --h2:#35226E;
+}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 Lato,"Segoe UI",system-ui,sans-serif}
+header{background:linear-gradient(120deg,var(--h1),var(--h2));color:#fff;padding:22px 20px 26px}
+.hwrap{max-width:820px;margin:0 auto;display:flex;gap:16px;align-items:center}
+header svg{width:84px;height:84px;flex:0 0 auto}
+.kicker{font-family:Oswald,Lato,sans-serif;letter-spacing:.06em;text-transform:uppercase;color:var(--cyan);font-size:14px}
+header h1{margin:2px 0 4px;font-size:clamp(26px,5vw,36px);font-weight:900;line-height:1.1}
+header p{margin:0;opacity:.9}
+main{max-width:820px;margin:0 auto;padding:18px 16px 60px}
+.steps{display:flex;gap:6px;margin:4px 0 18px}
+.steps span{flex:1;height:8px;border-radius:99px;background:var(--line)}
+.steps span.on{background:var(--teal)}
+.card{background:var(--panel);border:1px solid var(--line);border-top:6px solid var(--teal);border-radius:18px;padding:20px;box-shadow:0 4px 16px rgba(43,37,102,.07);margin-bottom:16px}
+.card.coral{border-top-color:var(--coral)}
+.tag{font-family:Oswald,Lato,sans-serif;text-transform:uppercase;letter-spacing:.05em;color:var(--teal);font-size:14px}
+.card.coral .tag{color:var(--coral)}
+h2{margin:2px 0 12px;font-size:24px;color:var(--indigo);font-weight:900}
+label{display:block;font-weight:700;margin:14px 0 6px}
+textarea,input[type=text]{width:100%;border:1.5px solid var(--line);background:var(--bg);color:var(--ink);border-radius:12px;padding:11px 12px;font:inherit;min-height:52px;resize:vertical}
+textarea:focus,input:focus,button:focus-visible{outline:3px solid var(--teal);outline-offset:1px}
+.ex{background:var(--tealbg);border-radius:12px;padding:12px 14px;font-size:14px;margin-top:14px}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.btn{background:var(--indigo);color:#fff;border:0;border-radius:999px;padding:12px 20px;font:inherit;font-weight:900;cursor:pointer}
+.btn.teal{background:var(--teal)}
+.btn.ghost{background:transparent;color:var(--indigo);border:2px solid var(--line)}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.nav{display:flex;justify-content:space-between;gap:10px;margin-top:18px}
+.timer{font-family:Oswald,Lato,sans-serif;font-size:34px;color:var(--coral);min-width:70px;text-align:center}
+.q{border:1.5px solid var(--line);border-radius:14px;padding:14px;margin:10px 0;display:flex;gap:12px;align-items:center;justify-content:space-between;flex-wrap:wrap}
+.q b{display:block}
+.q small{color:var(--soft)}
+.yn{display:flex;gap:8px}
+.yn button{border:2px solid var(--line);background:var(--panel);color:var(--ink);border-radius:999px;padding:9px 18px;font:inherit;font-weight:900;cursor:pointer}
+.yn button.on.si{background:var(--teal);border-color:var(--teal);color:#fff}
+.yn button.on.no{background:var(--ink);border-color:var(--ink);color:var(--panel)}
+.focos{display:grid;gap:10px;grid-template-columns:repeat(auto-fit,minmax(180px,1fr))}
+.foco{border:2px solid var(--line);border-radius:14px;padding:14px;background:var(--panel);color:var(--ink);text-align:left;font:inherit;cursor:pointer}
+.foco.on{border-color:var(--teal);background:var(--tealbg)}
+.foco b{display:block;font-size:17px}
+.kit{display:grid;gap:10px;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));margin:10px 0}
+.tool{border-radius:14px;padding:14px;border:2px solid var(--line)}
+.tool.yes{border-color:var(--teal);background:var(--tealbg)}
+.tool.later{border-style:dashed;opacity:.8}
+.tool .ic{font-size:26px}
+.tool b{display:block;font-size:17px}
+.tool small{color:var(--soft)}
+.warn{background:var(--coralbg);border-radius:12px;padding:12px 14px;margin:10px 0;font-size:15px}
+pre{white-space:pre-wrap;word-break:break-word;background:#151A33;color:#E7F9FF;border-radius:14px;padding:16px;font:14px/1.6 ui-monospace,Menlo,Consolas,monospace;margin:10px 0}
+.ok{color:var(--teal);font-weight:900}
+.hidden{display:none}
+@media (prefers-reduced-motion:no-preference){.card{animation:in .25s ease}}
+@keyframes in{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+</style>
+</head>
+<body>
+<header><div class="hwrap">
+  <svg viewBox="0 0 120 120" aria-hidden="true">
+    <line x1="60" y1="14" x2="60" y2="24" stroke="#fff" stroke-width="3"/><circle cx="60" cy="11" r="5" fill="#7FF5FF"/>
+    <ellipse cx="60" cy="48" rx="34" ry="28" fill="#fff"/>
+    <circle cx="26" cy="50" r="7" fill="#DDE3F2"/><circle cx="94" cy="50" r="7" fill="#DDE3F2"/>
+    <rect x="36" y="32" width="48" height="32" rx="16" fill="#151A33"/>
+    <path d="M45 48 q5 -8 10 0" stroke="#7FF5FF" stroke-width="4" fill="none" stroke-linecap="round"/>
+    <path d="M65 48 q5 -8 10 0" stroke="#7FF5FF" stroke-width="4" fill="none" stroke-linecap="round"/>
+    <path d="M54 56 q6 4 12 0" stroke="#7FF5FF" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+    <path d="M40 80 q20 -8 40 0 v18 q-20 10 -40 0z" fill="#fff"/>
+    <rect x="53" y="84" width="14" height="7" rx="3.5" fill="#FF5A5F"/>
+  </svg>
+  <div><div class="kicker">Clase 11 · Modo comandante</div><h1>Mi Ficha de Misión</h1>
+  <p>Define tu proyecto y descubre qué herramientas necesitas de verdad.</p></div>
+</div></header>
+
+<main>
+  <div class="steps" aria-hidden="true"><span></span><span></span><span></span><span></span></div>
+
+  <!-- PASO 1 -->
+  <section class="card" id="s1">
+    <div class="tag">Paso 1 · Pitch relámpago</div>
+    <h2>Tu idea en 60 segundos</h2>
+    <div class="row"><button class="btn teal" id="btnTimer">▶ Iniciar cronómetro</button><span class="timer" id="timer">60</span></div>
+    <label for="p0">Nombre de tu emprendimiento o proyecto</label>
+    <input type="text" id="p0" placeholder="Ej: PulserArte">
+    <label for="p1">1. ¿Qué vendo o de qué trata mi proyecto?</label>
+    <textarea id="p1" placeholder="Ej: pulseras personalizadas con nombres"></textarea>
+    <label for="p2">2. ¿A quién le vendo o cuál es el objetivo?</label>
+    <textarea id="p2" placeholder="Ej: a mis compañeros de clase y a sus mamás"></textarea>
+    <label for="p3">3. ¿Cómo lo entrego? (si aplica)</label>
+    <textarea id="p3" placeholder="Ej: por Telegram con foto y precio; me pagan por transferencia"></textarea>
+    <label for="p4">🎯 Mi meta: ¿qué quiero que funcione antes de la Clase 15?</label>
+    <textarea id="p4" placeholder="Ej: tener un agente que responda preguntas y envíe el catálogo automático"></textarea>
+    <div class="ex"><b>Ejemplo:</b> <b>PulserArte.</b> Vendo pulseras personalizadas con nombres. Le vendo a mis compañeros de clase y a sus mamás. Las entrego por Telegram con foto y precio, y la gente me paga por transferencia. <b>Meta:</b> tener un agente que responda preguntas y envíe el catálogo automático antes de la Clase 15.</div>
+    <div class="nav"><button class="btn ghost" id="btnIdea">🤔 Todavía no tengo idea</button><button class="btn" id="go2">Siguiente →</button></div>
+    <div id="ideaBox" class="hidden">
+      <label for="gusta">Me gusta…</label><input type="text" id="gusta" placeholder="Ej: los videojuegos y dibujar">
+      <label for="bueno">Soy bueno en…</label><input type="text" id="bueno" placeholder="Ej: explicar cosas y organizar">
+      <p>Copia este prompt en Claude Code, elige una de las 3 ideas y regresa a llenar tu pitch:</p>
+      <pre id="promptIdea"></pre>
+      <button class="btn teal" data-copy="promptIdea">📋 Copiar prompt</button>
+    </div>
+  </section>
+
+  <!-- PASO 2 -->
+  <section class="card hidden" id="s2">
+    <div class="tag">Paso 2 · Test de decisión</div>
+    <h2>¿Qué necesita realmente tu proyecto?</h2>
+    <div class="q" data-q="vende"><div><b>💰 ¿Tu proyecto va a vender algo?</b><small>Un producto, servicio, entrada, curso…</small></div><div class="yn"><button class="si">Sí</button><button class="no">No</button></div></div>
+    <div class="q" data-q="repite"><div><b>🔁 ¿Necesitas que algo se repita solo?</b><small>Enviar mensajes, guardar datos, publicar…</small></div><div class="yn"><button class="si">Sí</button><button class="no">No</button></div></div>
+    <div class="q" data-q="voz"><div><b>🎙️ ¿Necesitas que hable por voz con alguien?</b><small>Un personaje, asistente o agente que conversa.</small></div><div class="yn"><button class="si">Sí</button><button class="no">No</button></div></div>
+    <div class="q" data-q="meta"><div><b>📣 ¿Un adulto de tu familia tiene cuenta REAL de Meta Ads y te va a apoyar?</b><small>Meta pide ser mayor de edad para anunciar.</small></div><div class="yn"><button class="si">Sí</button><button class="no">No</button></div></div>
+    <div class="nav"><button class="btn ghost" data-back="1">← Atrás</button><button class="btn" id="go3" disabled>Siguiente →</button></div>
+  </section>
+
+  <!-- PASO 3 -->
+  <section class="card hidden" id="s3">
+    <div class="tag">Paso 3 · Tu rol</div>
+    <h2>¿No venderás productos? Elige tu rol</h2>
+    <div class="focos">
+      <button class="foco" data-foco="contenido"><b>📱 Rol Creador</b>Automatizar la creación y publicación de contenido para redes o Telegram.</button>
+      <button class="foco" data-foco="servicios"><b>🎧 Rol Servicios</b>Automatizar la atención a clientes de un servicio: diseño, tutorías, música.</button>
+      <button class="foco" data-foco="personal"><b>🎓 Rol Personal</b>Automatizar algo de tu vida diaria: organización, estudio, recordatorios.</button>
+    </div>
+    <div class="nav"><button class="btn ghost" data-back="2">← Atrás</button><button class="btn" id="go4" disabled>Ver mi kit →</button></div>
+  </section>
+
+  <!-- PASO 4 -->
+  <section class="card coral hidden" id="s4">
+    <div class="tag">Paso 4 · Resultado</div>
+    <h2>Tu kit de herramientas</h2>
+    <div class="kit" id="kit"></div>
+    <div id="avisos"></div>
+    <h2 style="margin-top:18px">Tu prompt para Jarvis</h2>
+    <p>Copia este prompt y pégalo en Claude Code dentro de tu carpeta Mi-Jarvis:</p>
+    <pre id="promptFicha"></pre>
+    <div class="row"><button class="btn teal" data-copy="promptFicha">📋 Copiar prompt</button><button class="btn ghost" data-copy="linea">💬 Copiar resumen para el chat</button></div>
+    <p id="linea" class="hidden"></p>
+    <div class="nav"><button class="btn ghost" data-back="2">← Cambiar respuestas</button></div>
+  </section>
+</main>
+
+<script>
+const $=s=>document.querySelector(s);
+const R={vende:null,repite:null,voz:null,meta:null,foco:null};
+const val=id=>$("#"+id).value.trim();
+
+/* Pasos */
+function show(n){
+  ["s1","s2","s3","s4"].forEach((id,i)=>$("#"+id).classList.toggle("hidden",i!==n-1));
+  document.querySelectorAll(".steps span").forEach((s,i)=>s.classList.toggle("on",i<n));
+  window.scrollTo({top:0,behavior:"smooth"});
+}
+document.querySelectorAll("[data-back]").forEach(b=>b.onclick=()=>show(+b.dataset.back));
+
+/* Cronómetro 60 s */
+let t=null;
+$("#btnTimer").onclick=()=>{
+  if(t){clearInterval(t);t=null;$("#timer").textContent="60";$("#btnTimer").textContent="▶ Iniciar cronómetro";return;}
+  let s=60;$("#timer").textContent=s;$("#btnTimer").textContent="■ Reiniciar";
+  t=setInterval(()=>{s--;$("#timer").textContent=s;if(s<=0){clearInterval(t);t=null;$("#timer").textContent="¡Tiempo!";$("#btnTimer").textContent="▶ Otra vez";}},1000);
+};
+
+/* No tengo idea */
+function promptIdea(){
+  $("#promptIdea").textContent=`Jarvis, quiero crear un emprendimiento o proyecto de automatización pero todavía no sé cuál. Me gusta ${val("gusta")||"[2 cosas que te gustan]"} y soy bueno en ${val("bueno")||"[algo en lo que eres bueno]"}. Dame 3 ideas sencillas que pueda construir en 5 clases con Claude Code y n8n. Para cada una dime para quién sería y qué problema resuelve. Solo ideas, no construyas nada.`;
+}
+$("#btnIdea").onclick=()=>{$("#ideaBox").classList.toggle("hidden");promptIdea();};
+["gusta","bueno"].forEach(id=>$("#"+id).oninput=promptIdea);
+
+$("#go2").onclick=()=>{
+  if(!val("p0")||!val("p1")||!val("p2")||!val("p4")){alertBox("Escribe el nombre, las preguntas 1 y 2 y tu meta para seguir.");return;}
+  show(2);
+};
+function alertBox(msg){
+  let el=$("#s1 .warn"); if(!el){el=document.createElement("div");el.className="warn";$("#s1 .nav").before(el);}
+  el.textContent=msg;
+}
+
+/* Sí / No */
+document.querySelectorAll(".q").forEach(q=>{
+  q.querySelectorAll("button").forEach(b=>b.onclick=()=>{
+    q.querySelectorAll("button").forEach(x=>x.classList.remove("on"));
+    b.classList.add("on"); R[q.dataset.q]=b.classList.contains("si");
+    $("#go3").disabled=["vende","repite","voz","meta"].some(k=>R[k]===null);
+  });
+});
+$("#go3").onclick=()=>{ if(R.vende){R.foco="ventas";resultado();show(4);} else show(3); };
+
+/* Foco */
+document.querySelectorAll(".foco").forEach(f=>f.onclick=()=>{
+  document.querySelectorAll(".foco").forEach(x=>x.classList.remove("on"));
+  f.classList.add("on"); R.foco=f.dataset.foco; $("#go4").disabled=false;
+});
+$("#go4").onclick=()=>{resultado();show(4);};
+
+/* Resultado */
+function resultado(){
+  const n8n=R.repite, voz=R.voz, meta=R.vende&&R.meta;
+  let extras=[n8n&&"n8n",voz&&"ElevenLabs",meta&&"Meta Ads"].filter(Boolean);
+  let despues=[];
+  const avisos=[];
+  // Regla MVP: máximo 2 herramientas además de Claude Code
+  if(extras.length>2){
+    despues=["Meta Ads"]; extras=extras.filter(x=>x!=="Meta Ads");
+    avisos.push("🧭 <b>Regla MVP:</b> máximo 2 herramientas además de Claude Code. Dejamos <b>Meta Ads para después</b>: primero que tu proyecto funcione, luego lo anuncias.");
+  }
+  if(R.meta&&!R.vende) avisos.push("📣 Meta Ads sirve para anunciar algo que vendes. Como tu proyecto no vende, no la necesitas por ahora.");
+  if(R.vende&&!R.meta) avisos.push("📣 Sin Meta Ads no pasa nada: puedes vender con tu página web, Telegram o boca a boca.");
+  if(voz) avisos.push("🎙️ Usa la voz solo si es el corazón de tu proyecto. Si es un extra, platícalo con tu facilitador.");
+  if(!extras.length) avisos.push("✨ Tu MVP se puede construir solo con Claude Code. ¡Más simple, más rápido!");
+
+  const tools=[
+    {n:"Claude Code",ic:"💻",d:"Construir y conectar tu proyecto",on:true},
+    {n:"n8n",ic:"🔁",d:"Automatizar lo que se repite",on:extras.includes("n8n")},
+    {n:"ElevenLabs",ic:"🎙️",d:"Que tu proyecto hable",on:extras.includes("ElevenLabs")},
+    {n:"Meta Ads",ic:"📣",d:"Anunciar lo que vendes",on:extras.includes("Meta Ads"),later:despues.includes("Meta Ads")}
+  ];
+  $("#kit").innerHTML=tools.map(x=>`<div class="tool ${x.on?"yes":""} ${x.later?"later":""}"><span class="ic">${x.ic}</span><b>${x.n}</b><small>${x.on?"✅ La necesito":x.later?"⏳ Para después":"— No por ahora"}</small><br><small>${x.d}</small></div>`).join("");
+  $("#avisos").innerHTML=avisos.map(a=>`<div class="warn">${a}</div>`).join("");
+
+  const focoTxt={ventas:"ventas",contenido:"Rol Creador",servicios:"Rol Servicios",personal:"Rol Personal"}[R.foco];
+  const kitTxt="Claude Code"+(extras.length?" + "+extras.join(" + "):"");
+  $("#promptFicha").textContent=
+`Jarvis, a partir de hoy trabajo en MI PROPIO proyecto. Esta es mi Ficha de Misión:
+- Nombre: ${val("p0")}
+- Qué vendo o de qué trata: ${val("p1")}
+- Para quién o cuál es el objetivo: ${val("p2")}
+- Cómo lo entrego: ${val("p3")||"todavía no lo sé"}
+- Enfoque: ${focoTxt}
+- Herramientas que elegí: ${kitTxt}
+- Mi meta antes de la Clase 15: ${val("p4")}
+Guárdala en mi-mision.md con el título 'Mi Ficha de Misión'. Después propónme un plan de 3 pasos para lograr mi meta: Clase 12 (construir mi primer flujo), Clase 13 (mejorar el punto más débil) y Clase 14 (que funcione de principio a fin). Hazlo simple, son clases de 1 hora. No construyas nada todavía.`;
+  $("#linea").textContent=`🚀 ${val("p0")} · Mi misión: ${val("p1")} · Para: ${val("p2")} · Enfoque: ${focoTxt} · Kit: ${kitTxt}`;
+}
+
+/* Copiar */
+document.querySelectorAll("[data-copy]").forEach(b=>b.onclick=async()=>{
+  const txt=$("#"+b.dataset.copy).textContent; const orig=b.textContent;
+  try{await navigator.clipboard.writeText(txt);b.textContent="✅ ¡Copiado!";}
+  catch(e){
+    const ta=document.createElement("textarea");ta.value=txt;document.body.appendChild(ta);ta.select();
+    try{document.execCommand("copy");b.textContent="✅ ¡Copiado!";}catch(_){b.textContent="Selecciona y copia a mano";}
+    ta.remove();
+  }
+  setTimeout(()=>b.textContent=orig,1800);
+});
+
+show(1);
+</script>
+</body>
+</html>
