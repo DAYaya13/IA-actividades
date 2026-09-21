@@ -73,6 +73,8 @@ textarea:focus,input:focus,button:focus-visible{outline:3px solid var(--teal);ou
 pre{white-space:pre-wrap;word-break:break-word;background:#151A33;color:#E7F9FF;border-radius:14px;padding:16px;font:14px/1.6 ui-monospace,Menlo,Consolas,monospace;margin:10px 0}
 .ok{color:var(--teal);font-weight:900}
 .hidden{display:none}
+.sel{width:100%;border:1.5px solid var(--line);background:var(--bg);color:var(--ink);border-radius:12px;padding:11px 12px;font:inherit;min-height:52px}
+.sent{background:var(--tealbg);border-radius:12px;padding:12px 14px;margin:10px 0;font-weight:700}
 @media (prefers-reduced-motion:no-preference){.card{animation:in .25s ease}}
 @keyframes in{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
 </style>
@@ -102,6 +104,11 @@ pre{white-space:pre-wrap;word-break:break-word;background:#151A33;color:#E7F9FF;
     <div class="tag">Paso 1 · Pitch relámpago</div>
     <h2>Tu idea en 60 segundos</h2>
     <div class="row"><button class="btn teal" id="btnTimer">▶ Iniciar cronómetro</button><span class="timer" id="timer">60</span></div>
+    <div class="row" style="align-items:flex-end">
+      <div style="flex:2;min-width:200px"><label for="al">Tu nombre y primer apellido (o tu código de comandante)</label><input type="text" id="al" placeholder="Ej: Ana López"></div>
+      <div style="flex:1;min-width:120px"><label for="gen">Generación</label><select id="gen" class="sel"><option value="">Elige</option><option>1</option><option>2</option><option>3</option><option>4</option></select></div>
+      <div style="flex:1;min-width:120px"><label for="gru">Grupo</label><select id="gru" class="sel"><option value="">Elige</option><option>10–13</option><option>14–17</option></select></div>
+    </div>
     <label for="p0">Nombre de tu emprendimiento o proyecto</label>
     <input type="text" id="p0" placeholder="Ej: PulserArte">
     <label for="p1">1. ¿Qué vendo o de qué trata mi proyecto?</label>
@@ -155,8 +162,13 @@ pre{white-space:pre-wrap;word-break:break-word;background:#151A33;color:#E7F9FF;
     <h2 style="margin-top:18px">Tu prompt para Jarvis</h2>
     <p>Copia este prompt y pégalo en Claude Code dentro de tu carpeta Mi-Jarvis:</p>
     <pre id="promptFicha"></pre>
-    <div class="row"><button class="btn teal" data-copy="promptFicha">📋 Copiar prompt</button><button class="btn ghost" data-copy="linea">💬 Copiar resumen para el chat</button></div>
+    <div class="row"><button class="btn teal" data-copy="promptFicha">📋 Copiar para Jarvis</button><button class="btn ghost" data-copy="linea">💬 Copiar para el chat de Zoom</button></div>
     <p id="linea" class="hidden"></p>
+    <div style="margin-top:16px;border-top:1.5px solid var(--line);padding-top:16px">
+      <p><b>Último paso:</b> envía tu ficha para que tu facilitadora la tenga guardada.</p>
+      <button class="btn" id="btnEnviar">🚀 Enviar a mi facilitadora</button>
+      <div id="enviado"></div>
+    </div>
     <div class="nav"><button class="btn ghost" data-back="2">← Cambiar respuestas</button></div>
   </section>
 </main>
@@ -190,7 +202,7 @@ $("#btnIdea").onclick=()=>{$("#ideaBox").classList.toggle("hidden");promptIdea()
 ["gusta","bueno"].forEach(id=>$("#"+id).oninput=promptIdea);
 
 $("#go2").onclick=()=>{
-  if(!val("p0")||!val("p1")||!val("p2")||!val("p4")){alertBox("Escribe el nombre, las preguntas 1 y 2 y tu meta para seguir.");return;}
+  if(!val("al")||!val("gen")||!val("gru")||!val("p0")||!val("p1")||!val("p2")||!val("p4")){alertBox("Completa tu nombre, generación, grupo, el nombre del proyecto, las preguntas 1 y 2 y tu meta.");return;}
   show(2);
 };
 function alertBox(msg){
@@ -252,9 +264,26 @@ function resultado(){
 - Herramientas que elegí: ${kitTxt}
 - Mi meta antes de la Clase 15: ${val("p4")}
 Guárdala en mi-mision.md con el título 'Mi Ficha de Misión'. Después propónme un plan de 3 pasos para lograr mi meta: Clase 12 (construir mi primer flujo), Clase 13 (mejorar el punto más débil) y Clase 14 (que funcione de principio a fin). Hazlo simple, son clases de 1 hora. No construyas nada todavía.`;
+  FICHA={alumno:val("al"),generacion:val("gen"),grupo:val("gru"),proyecto:val("p0"),que:val("p1"),para_quien:val("p2"),entrega:val("p3"),meta:val("p4"),enfoque:focoTxt,kit:kitTxt};
+  $("#btnEnviar").disabled=false; $("#btnEnviar").textContent="🚀 Enviar a mi facilitadora"; $("#enviado").innerHTML="";
   $("#linea").textContent=`🚀 ${val("p0")} · Mi misión: ${val("p1")} · Para: ${val("p2")} · Enfoque: ${focoTxt} · Kit: ${kitTxt}`;
 }
 
+/* Enviar ficha a n8n (webhook → Google Sheets) */
+const WEBHOOK="https://yaya13.app.n8n.cloud/webhook/ficha-mision";
+let FICHA={};
+$("#btnEnviar").onclick=async()=>{
+  const b=$("#btnEnviar"); b.disabled=true; b.textContent="Enviando…";
+  const datos=new URLSearchParams({fecha:new Date().toISOString(),...FICHA});
+  try{
+    await fetch(WEBHOOK,{method:"POST",mode:"no-cors",body:datos});
+    $("#enviado").innerHTML='<div class="sent">✅ ¡Ficha enviada! Tu facilitadora ya la tiene.</div>';
+    b.textContent="✅ Enviada";
+  }catch(e){
+    $("#enviado").innerHTML='<div class="warn">No se pudo enviar. Revisa tu internet e inténtalo de nuevo, o pega tu resumen en el chat de Zoom.</div>';
+    b.disabled=false; b.textContent="🚀 Enviar a mi facilitadora";
+  }
+};
 /* Copiar */
 document.querySelectorAll("[data-copy]").forEach(b=>b.onclick=async()=>{
   const txt=$("#"+b.dataset.copy).textContent; const orig=b.textContent;
