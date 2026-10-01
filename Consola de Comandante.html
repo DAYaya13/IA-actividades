@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Consola de Comandante</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+:root{--navy:#1E2761;--deep:#131A45;--purple:#41328D;--lav:#7E63F4;--coral:#FF6B4A;--sky:#CADCFC;--ink:#EEF1FA;--line:rgba(202,220,252,.22);
+ box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+*{box-sizing:border-box}
+body{margin:0;min-height:100vh;color:var(--ink);font-family:Inter,system-ui,sans-serif;line-height:1.55;
+ background:radial-gradient(900px 500px at 85% -10%,#41328D 0,var(--navy) 60%,var(--deep) 100%)}
+.wrap{max-width:980px;margin:0 auto;padding:24px 18px 48px;display:grid;grid-template-columns:1fr 300px;gap:22px;align-items:start}
+@media(max-width:780px){.wrap{grid-template-columns:1fr}.side{order:-1}}
+h1{font-size:clamp(1.5rem,4vw,2.1rem);margin:0;letter-spacing:-.02em}
+h2{font-size:1.25rem;margin:.1em 0 .5em}
+.mono{font-family:"JetBrains Mono",monospace}
+.sub{color:var(--sky);margin:.3em 0 16px;font-size:.95rem}
+.bar{display:flex;gap:6px;margin-bottom:16px}
+.bar i{flex:1;height:3px;background:var(--line)}
+.bar i.on{background:var(--coral)}
+.panel{background:rgba(255,255,255,.04);border:1px solid var(--line);border-radius:14px;padding:22px;backdrop-filter:blur(6px)}
+.tag{color:var(--coral);font-size:.75rem;letter-spacing:.18em;text-transform:uppercase;margin:0 0 6px}
+input{font:inherit;width:100%;padding:12px 14px;border-radius:10px;border:1px solid var(--line);background:rgba(0,0,0,.25);color:var(--ink);margin:6px 0 14px}
+input::placeholder{color:#8e97bb}
+button{font:600 .95rem Inter,sans-serif;cursor:pointer;border:0;border-radius:10px;padding:12px 18px}
+button:focus-visible,input:focus-visible{outline:2px solid var(--coral);outline-offset:2px}
+.btn{background:var(--coral);color:#fff;margin-top:18px}
+.btn:disabled{background:rgba(255,255,255,.08);color:#8e97bb;cursor:not-allowed}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:10px}
+.opt{background:rgba(0,0,0,.22);border:1px solid var(--line);color:var(--ink);text-align:left;padding:14px}
+.opt:hover{border-color:var(--lav)}
+.opt b{display:block;font-size:.98rem}
+.opt small{color:var(--sky);font-weight:400;display:block;margin-top:2px}
+.opt.sel{border-color:var(--coral);background:rgba(255,107,74,.14)}
+.note{margin-top:16px;padding:12px 14px;border-left:3px solid var(--lav);background:rgba(126,99,244,.12);font-size:.93rem}
+.note:empty{display:none}
+.side{position:sticky;top:18px}
+.row{display:flex;justify-content:space-between;gap:10px;padding:9px 0;border-bottom:1px dashed var(--line);font-size:.85rem}
+.row span{color:#7f89b0}
+.row b{text-align:right;font-weight:600}
+.row.on span{color:var(--sky)}
+.status{font-size:.78rem;letter-spacing:.16em;text-transform:uppercase;color:var(--coral);margin-top:14px}
+.led{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--coral);margin-right:7px;vertical-align:middle;animation:p 1.4s infinite}
+@keyframes p{50%{opacity:.25}}
+.out{background:rgba(0,0,0,.35);border:1px solid var(--line);border-radius:10px;padding:16px;margin:14px 0;font-size:.92rem;white-space:pre-wrap;word-break:break-word}
+@media(prefers-reduced-motion:reduce){.led{animation:none}}
+.matrix{position:fixed;inset:0;z-index:0;opacity:.5;pointer-events:none}
+.wrap{position:relative;z-index:1}
+.boot{font-family:"JetBrains Mono",monospace;font-size:.9rem;line-height:1.9;color:#5CF2A5;text-shadow:0 0 8px rgba(92,242,165,.5);white-space:pre-wrap;min-height:170px}
+.boot .ok{color:#9CFFD0}
+.dossier{border:1px solid rgba(92,242,165,.35);background:rgba(0,20,10,.35);border-radius:10px;padding:16px;margin:14px 0;
+ font-family:"JetBrains Mono",monospace;color:#9CFFD0;text-shadow:0 0 6px rgba(92,242,165,.35)}
+.dossier .k{color:#4fd08a}
+.cursor{display:inline-block;width:9px;height:1.05em;background:#5CF2A5;vertical-align:-2px;animation:bl .9s step-end infinite}
+@keyframes bl{50%{opacity:0}}
+@media(prefers-reduced-motion:reduce){.cursor{animation:none}.matrix{display:none}}
+
+</style>
+</head>
+<body>
+<canvas class="matrix" id="mx"></canvas>
+<div class="wrap">
+  <main>
+    <h1 class="mono">CONSOLA DE COMANDANTE</h1>
+    <p class="sub">Configuración inicial del operador. Lo que definas aquí te acompaña las 16 clases.</p>
+    <div class="bar" id="bar"></div>
+    <section class="panel" id="stage"></section>
+  </main>
+  <aside class="panel side">
+    <p class="tag mono">Expediente</p>
+    <div id="file"></div>
+    <div class="status mono" id="status"><span class="led"></span>En configuración</div>
+  </aside>
+</div>
+<script>
+const $=id=>document.getElementById(id);
+const d={op:"",perfil:"",ia:"",tarea:"",aut:"",modo:""};
+let step=0;
+const esc=t=>String(t).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+
+const STEPS=[
+ {tag:"Paso 1 / Identidad",render(s){
+   s.innerHTML=`<h2>Registro de operador</h2>
+   <label>Nombre clave</label><input id="in" maxlength="24" placeholder="Ej. Nova, R. Castillo, K7" value="${esc(d.op)}">
+   <p><b>Tu estilo de trabajo</b></p><div class="grid" id="g"></div>`;
+   opts([["Estratega","Planeo antes de actuar"],["Ejecutor","Pruebo y corrijo sobre la marcha"],["Analista","Reviso los detalles"],["Creativo","Busco ángulos distintos"]],"perfil");
+   $("in").oninput=e=>{d.op=e.target.value.trim();ok()};
+ },ok:()=>d.op&&d.perfil},
+ {tag:"Paso 2 / Sistema",render(s){
+   s.innerHTML=`<h2>Nombra tu sistema de IA</h2>
+   <p class="sub">Es el equipo que vas a dirigir. No vale llamarlo Jarvis.</p>
+   <input id="in" maxlength="16" placeholder="Nombre del sistema" value="${esc(d.ia)}">`;
+   $("in").oninput=e=>{d.ia=e.target.value.trim();ok()};
+ },ok:()=>d.ia},
+ {tag:"Paso 3 / Primer encargo",render(s){
+   s.innerHTML=`<h2>¿Qué proceso le delegas primero?</h2><div class="grid" id="g"></div>`;
+   opts([["Atender mensajes","Responder lo repetitivo"],["Organizar información","Ordenar datos y pendientes"],["Producir contenido","Textos, imágenes o guiones"],["Investigar","Buscar y resumir"],["Dar seguimiento","Recordatorios y avisos"],["Vender","Cotizar y cerrar"]],"tarea",
+    "Que ejecute un proceso completo, cada vez que se necesita y sin pedírselo, es lo que hace que sea <b>agéntico</b>.");
+ },ok:()=>d.tarea},
+ {tag:"Paso 4 / Autonomía",render(s){
+   s.innerHTML=`<h2>Nivel de autonomía que le otorgas</h2><div class="grid" id="g"></div>`;
+   opts([["Nivel 1","Consulta cada paso"],["Nivel 2","Decide lo rutinario, consulta lo importante"],["Nivel 3","Opera solo y reporta al final"]],"aut",
+    "Eso es <b>agencialidad</b>. Delegar no es perder el control: es elegir dónde ponerlo.");
+ },ok:()=>d.aut},
+ {tag:"Paso 5 / Modo de trabajo",render(s){
+   s.innerHTML=`<h2>¿Cómo quieres que opere?</h2><div class="grid" id="g"></div>`;
+   opts([["Asesor","Propone y yo ejecuto"],["Constructor","Entrega el trabajo terminado"]],"modo",
+    "El asesor es una <b>IA generadora</b>; el constructor, una <b>IA constructora</b>. Vas a dirigir las dos.");
+ },ok:()=>d.modo}
+];
+
+function opts(list,key,note){
+  const g=$("g");
+  list.forEach(([a,b])=>{
+    const btn=document.createElement("button");btn.className="opt"+(d[key]===a?" sel":"");
+    btn.innerHTML=`<b>${a}</b><small>${b}</small>`;
+    btn.onclick=()=>{d[key]=a;[...g.children].forEach(c=>c.classList.remove("sel"));btn.classList.add("sel");if(note)$("note").innerHTML=note;ok()};
+    g.appendChild(btn);
+  });
+}
+function ok(){$("next").disabled=!STEPS[step].ok()}
+const FIELDS=[["Operador","op"],["Perfil","perfil"],["Sistema","ia"],["Proceso","tarea"],["Autonomía","aut"],["Modo","modo"]];
+function sidebar(){
+  $("file").innerHTML=FIELDS.map(([l,k])=>`<div class="row ${d[k]?"on":""}"><span>${l}</span><b>${d[k]?esc(d[k]):"—"}</b></div>`).join("");
+}
+function show(){
+  $("bar").innerHTML=STEPS.map((_,i)=>`<i class="${i<=step?"on":""}"></i>`).join("");
+  const s=$("stage");STEPS[step].render(s);
+  s.insertAdjacentHTML("afterbegin",`<p class="tag mono">${STEPS[step].tag}</p>`);
+  s.insertAdjacentHTML("beforeend",`<div class="note" id="note"></div><button class="btn" id="next">${step===4?"Activar sistema":"Continuar"}</button>`);
+  $("next").onclick=next;ok();sidebar();
+  const f=s.querySelector("input");if(f)f.focus();
+}
+function next(){ sidebar(); step++; step<5?show():fin(); }
+function fin(){
+  sidebar();
+  $("status").innerHTML='<span class="led"></span>Sistema en línea';
+  const line=`${d.op} · ${d.perfil} | Sistema: ${d.ia} | Proceso: ${d.tarea} | Autonomía: ${d.aut} | Modo: ${d.modo}`;
+  $("stage").innerHTML=`<p class="tag mono">Secuencia de arranque</p><div class="boot" id="boot"></div>`;
+  lluvia();
+  const S=d.ia.toUpperCase();
+  const seq=[
+   "> iniciando nucleo "+S+" ...",
+   "> cargando perfil de operador: "+d.op.toUpperCase(),
+   "> estilo de mando: "+d.perfil.toLowerCase(),
+   "> proceso asignado: "+d.tarea.toLowerCase(),
+   "> nivel de autonomia: "+d.aut.toLowerCase(),
+   "> modo de operacion: "+d.modo.toLowerCase(),
+   "> verificando enlace ... <span class='ok'>estable</span>",
+   "<span class='ok'>> "+S+" EN LINEA. ESPERANDO ORDENES, COMANDANTE "+d.op.toUpperCase()+".</span>"
+  ];
+  let i=0;const b=$("boot");
+  const t=setInterval(()=>{
+    b.innerHTML=seq.slice(0,i+1).join("\n")+'<span class="cursor"></span>';
+    if(++i>=seq.length){clearInterval(t);setTimeout(dossier,700);}
+  },480);
+  window.__line=line;
+}
+function dossier(){
+  const line=window.__line;
+  $("stage").insertAdjacentHTML("beforeend",
+   `<div class="dossier">${FIELDS.map(([l,k])=>`<div><span class="k">${l.toUpperCase()}:</span> ${esc(d[k])}</div>`).join("")}</div>
+    <p class="sub">Esta configuración es la base de tu proyecto durante el curso.</p>
+    <button class="btn" id="cp">Copiar para el chat</button>`);
+  $("cp").onclick=async()=>{try{await navigator.clipboard.writeText(line);$("cp").textContent="Copiado ✓"}catch(e){$("cp").textContent="Selecciona el texto y cópialo"}};
+}
+function lluvia(){
+  const c=$("mx"),x=c.getContext("2d");
+  if(window.matchMedia("(prefers-reduced-motion: reduce)").matches)return;
+  const fit=()=>{c.width=innerWidth;c.height=innerHeight};fit();addEventListener("resize",fit);
+  const ch="アカサタナハマヤラワ0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
+  const F=16;let cols=Math.ceil(c.width/F),y=Array(cols).fill(1);
+  setInterval(()=>{
+    x.fillStyle="rgba(10,16,40,.09)";x.fillRect(0,0,c.width,c.height);
+    x.font=F+"px monospace";
+    cols=Math.ceil(c.width/F);
+    for(let i=0;i<cols;i++){
+      if(y[i]===undefined)y[i]=1;
+      const t=ch[Math.floor(Math.random()*ch.length)];
+      x.fillStyle=Math.random()>.97?"#CFFFE6":"#3FD98C";
+      x.fillText(t,i*F,y[i]*F);
+      if(y[i]*F>c.height&&Math.random()>.975)y[i]=0;
+      y[i]++;
+    }
+  },60);
+}
+show();
+</script>
+</body>
+</html>
